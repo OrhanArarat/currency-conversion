@@ -1,5 +1,6 @@
 package com.orhanararat.controller;
 
+import com.orhanararat.accessor.CurrencyConversionAccessor;
 import com.orhanararat.model.CurrencyConversion;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.env.Environment;
@@ -15,6 +16,7 @@ import java.util.HashMap;
 @RestController
 @RequiredArgsConstructor
 public class CurrencyConversionController {
+    private final CurrencyConversionAccessor currencyConversionAccessor;
     private final Environment environment;
 
     @GetMapping("currency-conversion/from/{from}/to/{to}/quantity/{quantity}")
@@ -33,6 +35,17 @@ public class CurrencyConversionController {
 
         return new CurrencyConversion(currencyConversion.getId(), from, to, currencyConversion.getConversionMultiple(),
                 quantity, currencyConversion.getTotalCalculateAmount(), environment.getProperty("server.port"));
+    }
+
+    @GetMapping("currency-conversion-feign/from/{from}/to/{to}/quantity/{quantity}")
+    public CurrencyConversion calculateCurrencyConversionFeign(@PathVariable String from,
+                                                          @PathVariable String to,
+                                                          @PathVariable BigDecimal quantity) {
+
+        CurrencyConversion currencyConversion = currencyConversionAccessor.getCurrencyExchange(from, to);
+
+        return new CurrencyConversion(currencyConversion.getId(), from, to, currencyConversion.getConversionMultiple(),
+                quantity, currencyConversion.getTotalCalculateAmount(), environment.getProperty("server.port")+ " feign");
     }
 
 }
